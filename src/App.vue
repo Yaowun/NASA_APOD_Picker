@@ -2,17 +2,18 @@
 import { ref } from 'vue';
 import DatePicker from './components/DatePicker.vue'
 import Gallery from './components/Gallery.vue'
+import type { Picture } from './types.ts';
 
-const pictureUrls = ref<string[]>([]);
+const pictures = ref<Picture[]>([]);
 
-function updatePictureUrls(value: string[]) {
-  pictureUrls.value = value;
+function updatePictures(value: Picture[]) {
+  pictures.value = value;
 }
 </script>
 
 <template>
-  <DatePicker @update:pictureUrls="updatePictureUrls" />
-  <Gallery :pictureUrls="pictureUrls" />
+  <DatePicker @update:pictures="updatePictures" />
+  <Gallery :pictures="pictures" />
 </template>
 
 <style scoped>
