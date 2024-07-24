@@ -4,6 +4,7 @@ export interface Picture {
     hdurl: string;
     media_type: 'image' | 'video';
     service_version: string;
+    thumbnail_url: string;
     title: string;
     url: string;
 }

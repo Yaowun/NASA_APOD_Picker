@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import DatePicker from './components/DatePicker.vue'
 import Gallery from './components/Gallery.vue'
-import type { Picture } from './types.ts';
+import type { Picture } from './types/types.ts';
 
 const pictures = ref<Picture[]>([]);
 

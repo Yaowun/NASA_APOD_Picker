@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import { ref, defineProps } from 'vue'
-import type { Picture } from '../types.ts';
+import type { Picture } from '../types/types.ts';
 
 const slide = ref(0)
 const props = defineProps<{
     pictures: Picture[];
 }>();
 
-function resolveMediaUrl(url: string, mediaType: 'image' | 'video') {
-    if (mediaType === 'video') {
-        const match = url.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
-        if (match && match[1]) {
-            return `http://i3.ytimg.com/vi/${match[1]}/hqdefault.jpg`;
-        }
+function resolveMediaUrl(picture: Picture) {
+    if (picture.media_type === 'video') {
+        return picture.thumbnail_url;
     }
-    return url;
+    return picture.url;
 }
 </script>
 
@@ -31,7 +28,7 @@ function resolveMediaUrl(url: string, mediaType: 'image' | 'video') {
                 v-for="(picture, index) in props.pictures"
                 :key="index"
                 :name="index"
-                :img-src="resolveMediaUrl(picture.url, picture.media_type)"
+                :img-src="resolveMediaUrl(picture)"
             />
         </q-carousel>
     </div>

@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import moment from 'moment';
 import axios from 'axios';
-import type { Picture } from '../types.ts';
+import type { Picture } from '../types/types.ts';
 
 
 const dateFormat = 'YYYY/MM/DD'
@@ -14,6 +14,7 @@ const dateRange = ref({
 })
 const isDateRangeChanged = ref(true)
 const isLoading = ref(false)
+const isDateRangeEmpty = ref(false)
 
 const availableDate = (date: string): boolean => {
     return moment(date, 'YYYY-MM-DD').isBefore(moment(), 'day')
@@ -27,23 +28,27 @@ const emit = defineEmits<{
 
 watch (dateRange, (newDateRange) => {
     isDateRangeChanged.value = true;
-    if (newDateRange) {
-        dateFrom.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.from, dateFormat);
-        dateTo.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.to, dateFormat);
-        console.log(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD'))
+    if (!newDateRange) {
+        isDateRangeEmpty.value = true;
+        return
     }
+    isDateRangeEmpty.value = false;
+
+    dateFrom.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.from, dateFormat);
+    dateTo.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.to, dateFormat);
+    console.log(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD'))
 });
 
 function singleDateRequest(date: string) {
-    apodEndPoint.value = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&date=${date}`;
+    apodEndPoint.value = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&date=${date}&thumbs=${true}`;
 }
 
 function multipleDateRequest(start_date: string, end_date: string) {
-    apodEndPoint.value = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&start_date=${start_date}&end_date=${end_date}`;
+    apodEndPoint.value = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&start_date=${start_date}&end_date=${end_date}&thumbs=${true}`;
 }
 
 async function submit() {
-    if (!isDateRangeChanged.value) {
+    if (!isDateRangeChanged.value || isDateRangeEmpty.value) {
         return
     }
     isLoading.value = true;
@@ -65,16 +70,29 @@ async function submit() {
 </script>
 
 <template>
-    <div class="q-pa-md">
-        <q-form @submit="submit" class="q-gutter-md">
+    <q-form 
+        @submit="submit"
+        class="row flex-center q-pa-md" 
+        vertical-middle
+    >
+        <div class="q-mx-md">
             <q-date 
                 v-model="dateRange"
                 :options="availableDate"
                 range
                 minimal
             />
-
-            <div>
+            <div class="row justify-between q-pt-sm">
+                <q-field 
+                    class="col-8" 
+                    label="Date Range" 
+                    stack-label
+                >
+                    <template v-slot:control>
+                        <div v-if="isDateRangeEmpty" class="self-center full-width no-outline" tabindex="0"></div>
+                        <div v-else class="self-center full-width no-outline" tabindex="0">{{ dateFrom.format(dateFormat) }} - {{ dateTo.format(dateFormat) }}</div>
+                    </template>
+                </q-field>
                 <q-btn 
                     label="Submit"
                     type="submit" 
@@ -83,6 +101,6 @@ async function submit() {
                     :loading="isLoading"
                 />
             </div>
-        </q-form>
-    </div>
+        </div>
+    </q-form>
 </template>
