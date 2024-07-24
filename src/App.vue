@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import Header from './components/Header.vue'
 import DatePicker from './components/DatePicker.vue'
 import Gallery from './components/Gallery.vue'
 import type { Picture } from './types/types.ts';
@@ -12,6 +13,7 @@ function updatePictures(value: Picture[]) {
 </script>
 
 <template>
+  <Header />
   <DatePicker @update:pictures="updatePictures" />
   <Gallery :pictures="pictures" />
 </template>
