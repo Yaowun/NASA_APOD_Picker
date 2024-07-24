@@ -17,35 +17,38 @@ const availableDate = (date: string): boolean => {
 
 const pictureUrls = ref<string[]>([]);
 
+const emit = defineEmits<{
+  (event: 'update:pictureUrls', value: string[]): void;
+}>();
+
 watch (dateRange, (newDateRange) => {
     if (newDateRange) {
-        dateFrom.value = moment(newDateRange.from, dateFormat);
-        dateTo.value = moment(newDateRange.to, dateFormat);
+        dateFrom.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.from, dateFormat);
+        dateTo.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.to, dateFormat);
+        console.log(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD'))
     }
 });
 
 function getPicture(date: string) {
     const apodEndPoint = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&date=${date}`;
-    console.log(apodEndPoint)
 
     axios.get(apodEndPoint).then((response) => {
-        response.data.url = response.data.media_type === 'video' ? `http://i3.ytimg.com/vi/${response.data.url.match(/\/embed\/([a-zA-Z0-9_-]{11})/)}/hqdefault.jpg` : response.data.url;
+        response.data.url = response.data.media_type === 'video' ? `http://i3.ytimg.com/vi/${response.data.url.match(/\/embed\/([a-zA-Z0-9_-]{11})/)[1]}/hqdefault.jpg` : response.data.url;
         pictureUrls.value.push(response.data.url)
     });
 }
 
 function submit() {
-    console.log('submit')
     pictureUrls.value = <string[]>([]);
     const pickDate = dateFrom.value;
+    console.log('pickDate', pickDate.format('YYYY-MM-DD'))
+    console.log('dateTo', dateTo.value.format('YYYY-MM-DD'))
     while (pickDate.isSameOrBefore(dateTo.value)) {
         getPicture(pickDate.format('YYYY-MM-DD'))
         pickDate.add(1, 'days')
     }
-    console.log(pictureUrls.value)
+    emit('update:pictureUrls', pictureUrls.value);
 }
-
-
 </script>
 
 <template>
@@ -55,7 +58,7 @@ function submit() {
                 v-model="dateRange"
                 :options="availableDate"
                 range
-                today-btn
+                minimal
             />
 
             <div>
