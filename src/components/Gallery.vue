@@ -1,35 +1,19 @@
 <script setup lang="ts">
-import { ref, defineProps } from 'vue'
+import { defineProps } from 'vue'
 import type { Picture } from '../types/types.ts';
+import Image from './Image.vue'
 
-const slide = ref(0)
 const props = defineProps<{
     pictures: Picture[];
 }>();
-
-function resolveMediaUrl(picture: Picture) {
-    if (picture.media_type === 'video') {
-        return picture.thumbnail_url;
-    }
-    return picture.url;
-}
 </script>
 
 <template>
-    <div class="q-pa-md">
-        <q-carousel
-            swipeable
-            animated
-            v-model="slide"
-            thumbnails
-            infinite
-        >
-            <q-carousel-slide
-                v-for="(picture, index) in props.pictures"
-                :key="index"
-                :name="index"
-                :img-src="resolveMediaUrl(picture)"
-            />
-        </q-carousel>
+    <div class="row q-pa-md">
+        <Image 
+            v-for="(picture, index) in props.pictures"
+            :picture="picture"
+            :index="index"
+        />
     </div>
 </template>

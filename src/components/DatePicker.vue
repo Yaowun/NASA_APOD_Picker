@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import type { Picture } from '../types/types.ts';
 import moment from 'moment';
 import axios from 'axios';
-import type { Picture } from '../types/types.ts';
 
 
 const dateFormat = 'YYYY/MM/DD'

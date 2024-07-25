@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { Picture } from './types/types.ts';
 import Header from './components/Header.vue'
 import DatePicker from './components/DatePicker.vue'
 import Gallery from './components/Gallery.vue'
-import type { Picture } from './types/types.ts';
 
 const pictures = ref<Picture[]>([]);
 
