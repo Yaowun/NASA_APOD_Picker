@@ -23,8 +23,7 @@ const updateWindowSize = () => {
     pictureSize.value = getPictureSize(windowWidth.value);
     if (imageAspectRatio.value > windowAspectRatio.value) {
         imageStyle.value = `width: 90vw; height: ${90 * windowAspectRatio.value / imageAspectRatio.value}vh; overflow: hidden;`;
-    }
-    else {
+    } else {
         imageStyle.value = `width: ${90 / windowAspectRatio.value * imageAspectRatio.value}vw; height: 90vh; overflow: hidden;`;
     }
 };
@@ -34,6 +33,7 @@ const getImageSize = (url: string) => {
     img.src = url;
     img.onload = () => {
         imageAspectRatio.value = img.naturalWidth / img.naturalHeight;
+        updateWindowSize();
     };
     img.onerror = (error) => {
         console.error('Failed to load image', error);
@@ -42,7 +42,6 @@ const getImageSize = (url: string) => {
 
 onMounted(() => {
     getImageSize(resolveMediaUrl(props.picture));
-    updateWindowSize();
     window.addEventListener('resize', updateWindowSize);
 });
 
@@ -70,7 +69,7 @@ function resolveMediaUrl(picture: Picture) {
         :style="`width: ${pictureSize}; height: ${pictureSize}; cursor: pointer`"
         @mouseover="showPictureInfo = true"
         @mouseleave="showPictureInfo = false"
-        @click="showPictureDetail = true; updateWindowSize()"
+        @click="showPictureDetail = true;"
     >
         <q-img
             style="width: 100%; height: 100%;"
