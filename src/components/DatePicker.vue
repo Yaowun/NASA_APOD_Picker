@@ -5,7 +5,7 @@ import moment from 'moment';
 import { ApodService } from '../services/Apod/ApodService.ts';
 import { useDateFormatter } from '../composable/useDateFormatter.ts';
 
-const { momentToQDate, qDateToMoment } = useDateFormatter();
+const { momentToQDate, qDateToMoment, qDateToDateUrl } = useDateFormatter();
 
 const emit = defineEmits<{
   (event: 'update:pictures', value: Picture[]): void;
@@ -47,7 +47,7 @@ const submit = async () => {
     isLoading.value = true;
     isDateRangeChanged.value = false;
 
-    ApodService.getPicture(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD')).then((response) => {
+    await ApodService.getPicture(qDateToDateUrl(dateRange.value.from), qDateToDateUrl(dateRange.value.to)).then((response) => {
         pictures.value = response;
     });
 

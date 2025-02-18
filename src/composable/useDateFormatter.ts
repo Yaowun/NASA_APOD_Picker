@@ -7,8 +7,12 @@ export function useDateFormatter() {
     };
 
     const qDateToMoment = (date: string) => {
-        return moment(date, DateTimeFormat.momentDate);
+        return moment(date, DateTimeFormat.dateUrl);
     };
 
-    return { momentToQDate, qDateToMoment };
+    const qDateToDateUrl = (date: string) => {
+        return moment(date, DateTimeFormat.qDate).format(DateTimeFormat.dateUrl);
+    }
+
+    return { momentToQDate, qDateToMoment, qDateToDateUrl };
 }
