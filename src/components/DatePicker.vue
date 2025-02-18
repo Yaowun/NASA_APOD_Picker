@@ -11,9 +11,8 @@ const emit = defineEmits<{
   (event: 'update:pictures', value: Picture[]): void;
 }>();
 
-const today = moment()
-const dateFrom = ref(today.subtract(7, 'days'))
-const dateTo = ref(today.subtract(1, 'days'))
+const dateFrom = ref(moment().subtract(7, 'days'))
+const dateTo = ref(moment().subtract(1, 'days'))
 const dateRange = ref({ 
     from: momentToQDate(dateFrom.value), 
     to: momentToQDate(dateTo.value)
@@ -24,7 +23,7 @@ const isDateRangeEmpty = ref(false)
 const isDateRangeChanged = ref(true)
 
 const availableDate = (date: string): boolean => {
-    return qDateToMoment(date).isBefore(today, 'day')
+    return qDateToMoment(date).isBefore(moment(), 'day')
 }
 const pictures = ref<Picture[]>([]);
 
