@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="row q-pa-md">
+    <div class="row q-pa-md justify-center">
         <Image 
             v-for="(picture, index) in props.pictures"
             :picture="picture"
