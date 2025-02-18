@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
-import type { Picture } from '../types/types.ts';
+import type { Picture } from '../services/Apod/models/Picture.ts';
 import Image from './Image.vue'
 
 const props = defineProps<{

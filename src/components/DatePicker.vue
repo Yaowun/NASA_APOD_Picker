@@ -1,30 +1,32 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Picture } from '../types/types.ts';
+import type { Picture } from '../services/Apod/models/Picture.ts';
 import moment from 'moment';
-import axios from 'axios';
+import { ApodService } from '../services/Apod/ApodService.ts';
+import { useDateFormatter } from '../composable/useDateFormatter.ts';
 
-
-const dateFormat = 'YYYY/MM/DD'
-const dateFrom = ref(moment().subtract(7, 'days'))
-const dateTo = ref(moment().subtract(1, 'days'))
-const dateRange = ref({ 
-    from: dateFrom.value.format(dateFormat), 
-    to: dateTo.value.format(dateFormat)
-})
-const isDateRangeChanged = ref(true)
-const isLoading = ref(false)
-const isDateRangeEmpty = ref(false)
-
-const availableDate = (date: string): boolean => {
-    return moment(date, 'YYYY-MM-DD').isBefore(moment(), 'day')
-}
-const apodEndPoint = ref('https://api.nasa.gov/planetary/apod')
-const pictures = ref<Picture[]>([]);
+const { momentToQDate, qDateToMoment } = useDateFormatter();
 
 const emit = defineEmits<{
   (event: 'update:pictures', value: Picture[]): void;
 }>();
+
+const today = moment()
+const dateFrom = ref(today.subtract(7, 'days'))
+const dateTo = ref(today.subtract(1, 'days'))
+const dateRange = ref({ 
+    from: momentToQDate(dateFrom.value), 
+    to: momentToQDate(dateTo.value)
+})
+
+const isLoading = ref(false)
+const isDateRangeEmpty = ref(false)
+const isDateRangeChanged = ref(true)
+
+const availableDate = (date: string): boolean => {
+    return qDateToMoment(date).isBefore(today, 'day')
+}
+const pictures = ref<Picture[]>([]);
 
 watch (dateRange, (newDateRange) => {
     isDateRangeChanged.value = true;
@@ -34,34 +36,21 @@ watch (dateRange, (newDateRange) => {
     }
     isDateRangeEmpty.value = false;
 
-    dateFrom.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.from, dateFormat);
-    dateTo.value = typeof newDateRange === 'string' ? moment(newDateRange, dateFormat) : moment(newDateRange.to, dateFormat);
-    console.log(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD'))
+    dateFrom.value = typeof newDateRange === 'string' ? qDateToMoment(newDateRange) : qDateToMoment(newDateRange.from);
+    dateTo.value = typeof newDateRange === 'string' ? qDateToMoment(newDateRange) : qDateToMoment(newDateRange.to);
 });
 
-function singleDateRequest(date: string) {
-    apodEndPoint.value = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&date=${date}&thumbs=${true}`;
-}
-
-function multipleDateRequest(start_date: string, end_date: string) {
-    apodEndPoint.value = `https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&start_date=${start_date}&end_date=${end_date}&thumbs=${true}`;
-}
-
-async function submit() {
+const submit = async () => {
     if (!isDateRangeChanged.value || isDateRangeEmpty.value) {
         return
     }
+
     isLoading.value = true;
     isDateRangeChanged.value = false;
 
-    if (dateFrom.value.isSame(dateTo.value)) {
-        singleDateRequest(dateFrom.value.format('YYYY-MM-DD'))
-        pictures.value = [(await axios.get<Picture>(apodEndPoint.value)).data];
-    }
-    else {
-        multipleDateRequest(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD'))
-        pictures.value = (await axios.get<Picture[]>(apodEndPoint.value)).data;
-    }
+    ApodService.getPicture(dateFrom.value.format('YYYY-MM-DD'), dateTo.value.format('YYYY-MM-DD')).then((response) => {
+        pictures.value = response;
+    });
 
     isLoading.value = false;
 
@@ -90,7 +79,7 @@ async function submit() {
                 >
                     <template v-slot:control>
                         <div v-if="isDateRangeEmpty" class="self-center full-width no-outline" tabindex="0"></div>
-                        <div v-else class="self-center full-width no-outline" tabindex="0">{{ dateFrom.format(dateFormat) }} - {{ dateTo.format(dateFormat) }}</div>
+                        <div v-else class="self-center full-width no-outline" tabindex="0">{{ momentToQDate(dateFrom) }} - {{ momentToQDate(dateTo) }}</div>
                     </template>
                 </q-field>
                 <q-btn 

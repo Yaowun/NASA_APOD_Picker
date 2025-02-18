@@ -1,4 +1,4 @@
-export interface Picture {
+export type Picture = {
     date: string;
     explanation: string;
     hdurl: string;
