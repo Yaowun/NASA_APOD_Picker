@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, defineProps, onMounted, onUnmounted } from 'vue'
-import type { Picture } from '../types/types.ts';
+import type { Picture } from '../services/Apod/models/Picture.ts';
 
 const props = defineProps<{
     picture: Picture;

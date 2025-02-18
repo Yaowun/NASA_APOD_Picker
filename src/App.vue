@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Picture } from './types/types.ts';
+import type { Picture } from './services/Apod/models/Picture.ts';
 import Header from './components/Header.vue'
 import DatePicker from './components/DatePicker.vue'
 import Gallery from './components/Gallery.vue'

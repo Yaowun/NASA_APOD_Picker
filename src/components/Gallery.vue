@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
-import type { Picture } from '../types/types.ts';
+import type { Picture } from '../services/Apod/models/Picture.ts';
 import Image from './Image.vue'
 
 const props = defineProps<{
@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="row q-pa-md">
+    <div class="row q-pa-md justify-center">
         <Image 
             v-for="(picture, index) in props.pictures"
             :picture="picture"
