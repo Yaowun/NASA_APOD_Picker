@@ -5,6 +5,8 @@ import moment from 'moment';
 import { ApodService } from '../services/Apod/ApodService.ts';
 import { useDateFormatter } from '../composable/useDateFormatter.ts';
 import { DateTimeFormat } from '../enum/DateTimeFormat';
+import { Notify } from 'quasar';
+import axios from 'axios';
 
 const { momentToDateUrl, dateUrlToMoment } = useDateFormatter();
 
@@ -53,13 +55,32 @@ const submit = async () => {
     isLoading.value = true;
     isDateRangeChanged.value = false;
 
-    await ApodService.getPicture(momentToDateUrl(dateFrom.value), momentToDateUrl(dateTo.value)).then((response) => {
-        pictures.value = response;
-    });
-
-    isLoading.value = false;
-
-    emit('update:pictures', pictures.value);
+    try {
+        await ApodService.getPicture(momentToDateUrl(dateFrom.value), momentToDateUrl(dateTo.value)).then((response) => {
+            pictures.value = response;
+            emit('update:pictures', pictures.value);
+        });
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response && error.response.status === 400) {
+                Notify.create({
+                    type: 'warning',
+                    message: error.response.data.msg,
+                    position: 'top',
+                    timeout: 5000
+                });
+            }
+        } else {
+            Notify.create({
+                type: 'negative',
+                message: 'Unexpected error occurred, please try again later.',
+                position: 'top',
+                timeout: 5000
+            });
+        }
+    } finally {
+        isLoading.value = false;
+    }
 }
 </script>
 
