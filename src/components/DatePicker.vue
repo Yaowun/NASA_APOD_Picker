@@ -4,8 +4,9 @@ import type { Picture } from '../services/Apod/models/Picture.ts';
 import moment from 'moment';
 import { ApodService } from '../services/Apod/ApodService.ts';
 import { useDateFormatter } from '../composable/useDateFormatter.ts';
+import { DateTimeFormat } from '../enum/DateTimeFormat';
 
-const { momentToQDate, qDateToMoment, qDateToDateUrl } = useDateFormatter();
+const { momentToDateUrl, dateUrlToMoment } = useDateFormatter();
 
 const emit = defineEmits<{
   (event: 'update:pictures', value: Picture[]): void;
@@ -14,8 +15,8 @@ const emit = defineEmits<{
 const dateFrom = ref(moment().subtract(7, 'days'))
 const dateTo = ref(moment().subtract(1, 'days'))
 const dateRange = ref({ 
-    from: momentToQDate(dateFrom.value), 
-    to: momentToQDate(dateTo.value)
+    from: momentToDateUrl(dateFrom.value), 
+    to: momentToDateUrl(dateTo.value)
 })
 
 const isLoading = ref(false)
@@ -23,7 +24,7 @@ const isDateRangeEmpty = ref(false)
 const isDateRangeChanged = ref(true)
 
 const availableDate = (date: string): boolean => {
-    return qDateToMoment(date).isBefore(moment(), 'day')
+    return dateUrlToMoment(date).isBefore(moment(), 'day')
 }
 const pictures = ref<Picture[]>([]);
 
@@ -35,8 +36,13 @@ watch (dateRange, (newDateRange) => {
     }
     isDateRangeEmpty.value = false;
 
-    dateFrom.value = typeof newDateRange === 'string' ? qDateToMoment(newDateRange) : qDateToMoment(newDateRange.from);
-    dateTo.value = typeof newDateRange === 'string' ? qDateToMoment(newDateRange) : qDateToMoment(newDateRange.to);
+    if (typeof newDateRange === 'string') {
+        dateFrom.value = dateUrlToMoment(newDateRange)
+        dateTo.value = dateUrlToMoment(newDateRange)
+    } else {
+        dateFrom.value = dateUrlToMoment(newDateRange.from)
+        dateTo.value = dateUrlToMoment(newDateRange.to)
+    }
 });
 
 const submit = async () => {
@@ -47,7 +53,7 @@ const submit = async () => {
     isLoading.value = true;
     isDateRangeChanged.value = false;
 
-    await ApodService.getPicture(qDateToDateUrl(dateRange.value.from), qDateToDateUrl(dateRange.value.to)).then((response) => {
+    await ApodService.getPicture(momentToDateUrl(dateFrom.value), momentToDateUrl(dateTo.value)).then((response) => {
         pictures.value = response;
     });
 
@@ -67,6 +73,7 @@ const submit = async () => {
             <q-date 
                 v-model="dateRange"
                 :options="availableDate"
+                :mask="DateTimeFormat.dateUrl"
                 range
                 minimal
             />
@@ -78,7 +85,7 @@ const submit = async () => {
                 >
                     <template v-slot:control>
                         <div v-if="isDateRangeEmpty" class="self-center full-width no-outline" tabindex="0"></div>
-                        <div v-else class="self-center full-width no-outline" tabindex="0">{{ momentToQDate(dateFrom) }} - {{ momentToQDate(dateTo) }}</div>
+                        <div v-else class="self-center full-width no-outline" tabindex="0">{{ momentToDateUrl(dateFrom) }} - {{ momentToDateUrl(dateTo) }}</div>
                     </template>
                 </q-field>
                 <q-btn 
