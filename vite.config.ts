@@ -4,7 +4,7 @@ import { quasar } from '@quasar/vite-plugin'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/nasa-apod/',
+  base: '/NASA_APOD_Picker/',
   plugins: [
     vue(),
 
